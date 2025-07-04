@@ -25,4 +25,4 @@ dependencies = [
 where = ["extractor"]
 
 [tool.setuptools.package-data]
-"" = ["static/*", "static/**/*", "sample_data/*", "sample_data/**/*"] 
+extractor = ["static/*", "static/**/*"] 

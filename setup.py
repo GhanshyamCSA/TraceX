@@ -18,11 +18,9 @@ setup(
         'sqlalchemy',
     ],
     package_data={
-        '': ['static/*', 'static/**/*', 'sample_data/*', 'sample_data/**/*'],
+        'extractor': ['static/*', 'static/**/*'],
+        '': ['sample_data/*', 'sample_data/**/*'],
     },
-    data_files=[
-        ('static', [os.path.join('static', f) for f in os.listdir('static') if os.path.isfile(os.path.join('static', f))]),
-    ],
     entry_points={
         'console_scripts': [
             'tracex=extractor.webapp:main',

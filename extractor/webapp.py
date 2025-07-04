@@ -36,7 +36,7 @@ app.add_middleware(
 
 # Get the correct path to static directory
 current_dir = Path(__file__).parent
-static_dir = current_dir.parent / "static"
+static_dir = current_dir / "static"
 
 # Serve static frontend
 app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
