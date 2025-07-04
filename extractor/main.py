@@ -50,6 +50,12 @@ def main():
     result_queue.put(None)
     writer_thread.join()
     db.close()
+    
+    # Clean up archive handler temporary directories
+    try:
+        archive_handler.cleanup_all()
+    except Exception:
+        pass
     if args.print_db:
         db = DBManager(args.db)
         all_ips = db.fetch_all_ips()

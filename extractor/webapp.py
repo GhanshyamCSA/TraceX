@@ -53,7 +53,7 @@ def extract_ips(
     extract_hashes: bool = Form(False),
     input_mode: str = Form('file')
 ):
-    temp_files = []
+    uploaded_temp_files = []
     input_paths = []
     if upload:
         if not isinstance(upload, list):
@@ -66,8 +66,8 @@ def extract_ips(
             os.makedirs(os.path.dirname(upload_path), exist_ok=True)
             with open(upload_path, "wb") as f:
                 f.write(upfile.file.read())
-            temp_files.append(upload_path)
-        input_paths = temp_files
+            uploaded_temp_files.append(upload_path)
+        input_paths = uploaded_temp_files
     elif local_path:
         input_paths = [local_path.strip()]
         if not input_paths[0]:
@@ -97,6 +97,10 @@ def extract_ips(
     file_discovery = FileDiscovery()
     archive_handler = ArchiveHandler()
     ip_extractor = TraceXExtractor()
+    
+    # Track all temporary files and directories for cleanup
+    temp_files = []
+    temp_dirs = []
     all_files = []
     for input_path in input_paths:
         try:
@@ -183,18 +187,37 @@ def extract_ips(
         columns = [desc[0] for desc in cursor.description]
         hash_results = [dict(zip(columns, row)) for row in cursor.fetchall()]
     db.close()
-    # Clean up temp files
-    for path in temp_files:
-        try:
-            os.remove(path)
-        except Exception:
-            pass
+    
+    # Clean up all temporary files and directories
+    try:
+        # Clean up uploaded temporary files
+        for path in uploaded_temp_files:
+            try:
+                os.remove(path)
+            except Exception:
+                pass
+        
+        # Clean up archive handler temporary directories
+        archive_handler.cleanup_all()
+        
+        # Clean up any other temporary directories
+        for temp_dir in temp_dirs:
+            try:
+                if os.path.exists(temp_dir):
+                    shutil.rmtree(temp_dir)
+            except Exception:
+                pass
+    except Exception:
+        pass
+    # Get database path for response
+    db_path = os.path.abspath(db_path)
+    
     if extract_ips and extract_hashes:
-        return {"ips": ip_results, "hashes": hash_results}
+        return {"ips": ip_results, "hashes": hash_results, "database_path": db_path}
     elif extract_ips:
-        return ip_results
+        return {"ips": ip_results, "database_path": db_path}
     elif extract_hashes:
-        return hash_results
+        return {"hashes": hash_results, "database_path": db_path}
     else:
         return {"error": "No extraction type selected."}
 

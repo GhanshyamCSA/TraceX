@@ -824,12 +824,18 @@
             
             const data = await response.json();
             
-            function renderStatistics(ipList, hashList) {
+            function renderStatistics(ipList, hashList, databasePath) {
                 let html = '<div class="results-container">';
                 html += '<h3 style="margin: 0 0 16px 0; color: var(--primary-blue);">Extraction Statistics</h3>';
                 
-                // Database success message
+                // Database success message with path
                 html += '<div class="status-message status-success" style="margin-bottom: 20px;">✅ Database successfully created and results saved</div>';
+                if (databasePath) {
+                    html += `<div style="margin-bottom: 20px; padding: 12px; border-radius: 6px; background: linear-gradient(135deg, #ff9a56 0%, #ff6b6b 100%); color: white; font-family: 'Courier New', monospace; font-size: 14px; border-left: 4px solid #ff8c00; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">`;
+                    html += `<strong>📁 Database Location:</strong><br>`;
+                    html += `<span style="word-break: break-all; display: inline-block; margin-top: 4px; background: rgba(255,255,255,0.1); padding: 6px 8px; border-radius: 3px;">${databasePath}</span>`;
+                    html += '</div>';
+                }
                 
                 // Statistics table
                 html += '<table class="results-table">';
@@ -903,14 +909,14 @@
 
             if (Array.isArray(data) && data.length > 0) {
                 if (data[0].ip !== undefined) {
-                    resultsDiv.innerHTML = renderStatistics(data, []);
+                    resultsDiv.innerHTML = renderStatistics(data, [], data.database_path);
                 } else if (data[0].hash_value !== undefined) {
-                    resultsDiv.innerHTML = renderStatistics([], data);
+                    resultsDiv.innerHTML = renderStatistics([], data, data.database_path);
                 } else {
                     resultsDiv.innerHTML = '<div class="status-message status-info">No results found in the provided files.</div>';
                 }
             } else if (data.ips || data.hashes) {
-                resultsDiv.innerHTML = renderStatistics(data.ips || [], data.hashes || []);
+                resultsDiv.innerHTML = renderStatistics(data.ips || [], data.hashes || [], data.database_path);
             } else if (data.error) {
                 resultsDiv.innerHTML = `<div class="status-message status-error">Error: ${data.error}</div>`;
             } else {
