@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  tracex:
+    build: .
+    ports:
+      - "55555:55555"
+    volumes:
+      - ./static:/app/static
+      - ./sample_data:/app/sample_data
+    restart: unless-stopped 

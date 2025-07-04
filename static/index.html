@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TraceX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #2563eb;
+            --primary-blue-dark: #1d4ed8;
+            --secondary-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-purple: #8b5cf6;
+            --bg-light: #f8fafc;
+            --bg-white: #ffffff;
+            --border-light: #e2e8f0;
+            --border-medium: #cbd5e1;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--text-primary);
+        }
+
+        .header {
+            width: 100vw;
+            max-width: none;
+            margin: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(270deg, var(--primary-blue), var(--accent-purple), var(--accent-green), var(--primary-blue));
+            background-size: 600% 600%;
+            animation: header-gradient-move 12s ease infinite;
+            color: #fff;
+            padding: 32px 0 28px 0;
+            text-align: center;
+            font-size: 2.4em;
+            font-weight: 800;
+            letter-spacing: 2px;
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 4px 24px 0 rgba(37, 99, 235, 0.10);
+        }
+        @keyframes header-gradient-move {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+            min-height: calc(100vh - 64px);
+            display: block;
+            overflow: visible;
+        }
+        .main-panels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            min-height: 600px;
+        }
+        .vertical-panel {
+            background: var(--bg-white);
+            border-radius: 16px;
+            padding: 40px 32px;
+            box-shadow: var(--shadow-lg);
+            border: 2px solid var(--border-light);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: flex-start;
+            min-height: 500px;
+        }
+        .form-container {
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 32px;
+            border: 2px solid var(--border-light);
+            margin-bottom: 32px;
+            max-width: 100%;
+        }
+        .results-container {
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 24px;
+            border: 2px solid var(--border-light);
+            margin-top: 0;
+            max-width: 100%;
+        }
+
+        .vertical-panel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .vertical-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-blue), var(--accent-purple), var(--accent-green));
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 32px;
+            color: var(--primary-blue);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-align: center;
+            justify-content: center;
+        }
+
+        .section-title::before {
+            content: '';
+            font-size: 1.2em;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group.horizontal {
+            flex-direction: row;
+            align-items: center;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        label::before {
+            font-size: 1.1em;
+        }
+
+        label[for="file-upload"]::before { content: '📁'; }
+        label[for="local-path"]::before { content: '📂'; }
+        label[for="use-mt"]::before { content: ''; }
+        label[for="threads"]::before { content: ''; }
+
+        input[type="file"], input[type="text"], select, input[type="number"] {
+            padding: 14px 18px;
+            border: 2px solid var(--border-medium);
+            border-radius: 8px;
+            font-size: 1em;
+            background: var(--bg-white);
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input[type="file"] {
+            background: linear-gradient(135deg, var(--bg-white) 0%, var(--bg-light) 100%);
+            cursor: pointer;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            outline: none;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary-blue);
+            cursor: pointer;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 32px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-blue-dark) 0%, var(--primary-blue) 100%);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--accent-green) 0%, #34d399 100%);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #059669 0%, var(--accent-green) 100%);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--accent-red) 0%, #f87171 100%);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #dc2626 0%, var(--accent-red) 100%);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 16px;
+            background: var(--bg-white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            border: 2px solid var(--border-light);
+        }
+
+        .results-table th, .results-table td {
+            padding: 16px 18px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .results-table th {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .results-table tr:nth-child(even) {
+            background: var(--bg-light);
+        }
+
+        .results-table tr:hover {
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .results-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .placeholder {
+            color: var(--text-secondary);
+            text-align: center;
+            font-size: 1.3em;
+            margin-top: 60px;
+            font-weight: 500;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .placeholder::before {
+            font-size: 3em;
+            opacity: 0.5;
+        }
+
+        .placeholder:nth-child(1)::before { content: ''; }
+        .placeholder:nth-child(2)::before { content: ''; }
+
+        .status-message {
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin: 16px 0;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-loading {
+            background: linear-gradient(135deg, var(--accent-orange) 0%, #fbbf24 100%);
+            color: white;
+        }
+
+        .status-error {
+            background: linear-gradient(135deg, var(--accent-red) 0%, #f87171 100%);
+            color: white;
+        }
+
+        .status-success {
+            background: linear-gradient(135deg, var(--accent-green) 0%, #34d399 100%);
+            color: white;
+        }
+
+        .status-info {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            color: white;
+        }
+
+        .progress-container {
+            margin: 24px 0;
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid var(--border-light);
+            display: none;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .progress-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1em;
+        }
+
+        .progress-percentage {
+            font-weight: 600;
+            color: var(--primary-blue);
+            font-size: 0.9em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: var(--border-light);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-blue) 0%, var(--accent-purple) 50%, var(--accent-green) 100%);
+            border-radius: 6px;
+            transition: width 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .progress-status {
+            margin-top: 8px;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        /* Remove mobile/tablet responsive styles - only desktop/laptop */
+        @media (max-width: 1200px) {
+            .main-container {
+                padding: 20px;
+            }
+            
+            .vertical-panel {
+                padding: 32px;
+            }
+            
+            .form-container {
+                padding: 24px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            /* Hide on mobile/tablet */
+            .main-container {
+                display: none;
+            }
+            
+            body::before {
+                content: 'This application is optimized for desktop and laptop screens only.';
+                display: block;
+                text-align: center;
+                padding: 50px 20px;
+                font-size: 1.2em;
+                color: var(--text-secondary);
+                background: var(--bg-light);
+                margin: 20px;
+                border-radius: 12px;
+            }
+        }
+        .form-row {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-end;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        .input-col {
+            flex: 1 1 0;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        .or-separator {
+            align-self: center;
+            font-weight: 700;
+            color: var(--primary-blue);
+            background: var(--bg-light);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1em;
+            box-shadow: 0 2px 8px 0 rgba(37,99,235,0.08);
+            margin-bottom: 8px;
+        }
+        @media (max-width: 900px) {
+            .form-row {
+                flex-direction: column;
+                gap: 12px;
+            }
+            .or-separator {
+                width: 100%;
+                height: auto;
+                border-radius: 12px;
+                margin: 8px 0;
+            }
+        }
+        #file-upload-group, #folder-upload-group {
+            width: 100%;
+            max-width: 400px;
+            min-width: 250px;
+            margin-bottom: 20px;
+        }
+        .form-group input[type="file"] {
+            width: 100%;
+        }
+        .form-group-row {
+            display: flex;
+            flex-direction: row;
+            gap: 24px;
+            margin-bottom: 20px;
+        }
+        #file-upload-group, #local-path-group {
+            flex: 1 1 0;
+            max-width: 400px;
+            min-width: 250px;
+        }
+        .form-group input[type="file"], .form-group input[type="text"] {
+            width: 100%;
+        }
+        @media (max-width: 900px) {
+            .form-group-row {
+                flex-direction: column;
+                gap: 12px;
+            }
+        }
+        .form-group-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 20px;
+        }
+        #file-upload-group, #local-path-group {
+            width: 100%;
+            max-width: 400px;
+            min-width: 250px;
+        }
+        .form-group input[type="file"], .form-group input[type="text"] {
+            width: 100%;
+        }
+        .or-separator {
+            font-weight: 700;
+            color: var(--primary-blue);
+            background: var(--bg-light);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1em;
+            box-shadow: 0 2px 8px 0 rgba(37,99,235,0.08);
+            margin: 0 0 0 0;
+        }
+        @media (max-width: 900px) {
+            .form-group-col {
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="header">TraceX</div>
+<div class="main-container">
+    <div class="main-panels">
+        <div class="vertical-panel">
+            <div class="section-title">Extract Public IPs / Hashes</div>
+            <div class="form-container">
+                <form id="extract-form">
+                    <div class="form-group horizontal">
+                        <label><input type="radio" name="input-mode" id="mode-file" value="file" checked> File</label>
+                        <label><input type="radio" name="input-mode" id="mode-folder" value="folder"> Folder</label>
+                    </div>
+                    <div class="form-group-col">
+                        <div class="form-group" id="local-path-group">
+                            <label for="local-path" id="local-path-label">Enter File Path</label>
+                            <input type="text" id="local-path" name="local_path" placeholder="e.g. C:\\Users\\USER\\PycharmProjects\\TraceX\\sample_data\\file1.txt">
+                        </div>
+                        <div class="or-separator">or</div>
+                        <div class="form-group" id="file-upload-group">
+                            <label for="file-upload" id="file-upload-label">Upload File</label>
+                            <input type="file" id="file-upload" name="upload" accept=".txt,.log,.zip,.tar,.gz,.rar">
+                        </div>
+                    </div>
+                    <div class="form-group horizontal">
+                        <label><input type="checkbox" id="extract-ips" name="extract_ips" checked> Extract IPs</label>
+                        <label><input type="checkbox" id="extract-hashes" name="extract_hashes"> Extract Hashes</label>
+                    </div>
+                    <div class="form-group horizontal">
+                        <label for="use-mt">Use Multithreading</label>
+                        <input type="checkbox" id="use-mt" name="use_multithreading">
+                        <label for="threads" id="threads-label" style="display:none;">Threads</label>
+                        <input type="number" id="threads" name="threads" min="1" max="32" value="4" style="width:80px; display:none;">
+                    </div>
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-primary">
+                            Extract
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                            Clear
+                        </button>
+                    </div>
+                    <input type="hidden" id="input-mode-hidden" name="input_mode" value="file">
+                </form>
+                <div class="progress-container" id="progress-container">
+                    <div class="progress-header">
+                        <div class="progress-title">Processing Files</div>
+                        <div class="progress-percentage" id="progress-percentage">0%</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-status" id="progress-status">Initializing...</div>
+                </div>
+            </div>
+        </div>
+        <div class="vertical-panel">
+            <div class="section-title">Results / Statistics</div>
+            <div id="results"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Show/hide threads input based on multithreading checkbox
+    document.getElementById('use-mt').addEventListener('change', function() {
+        const threadsLabel = document.getElementById('threads-label');
+        const threadsInput = document.getElementById('threads');
+        
+        if (this.checked) {
+            threadsLabel.style.display = 'flex';
+            threadsInput.style.display = 'block';
+        } else {
+            threadsLabel.style.display = 'none';
+            threadsInput.style.display = 'none';
+        }
+    });
+
+    // Toggle file/folder mode for both path and upload
+    document.addEventListener('DOMContentLoaded', function() {
+        const modeFile = document.getElementById('mode-file');
+        const modeFolder = document.getElementById('mode-folder');
+        const localPathLabel = document.getElementById('local-path-label');
+        const localPathInput = document.getElementById('local-path');
+        const fileUploadLabel = document.getElementById('file-upload-label');
+        const fileUploadInput = document.getElementById('file-upload');
+        const inputModeHidden = document.getElementById('input-mode-hidden');
+
+        function setFileMode() {
+            localPathLabel.textContent = 'Enter File Path';
+            localPathInput.placeholder = 'e.g. C:\\Users\\USER\\PycharmProjects\\TraceX\\sample_data\\file1.txt';
+            fileUploadLabel.textContent = 'Upload File';
+            fileUploadInput.removeAttribute('webkitdirectory');
+            fileUploadInput.removeAttribute('directory');
+            fileUploadInput.removeAttribute('multiple');
+            fileUploadInput.accept = '.txt,.log,.zip,.tar,.gz,.rar';
+            fileUploadInput.value = '';
+            localPathInput.value = '';
+            inputModeHidden.value = 'file';
+        }
+        function setFolderMode() {
+            localPathLabel.textContent = 'Enter Folder Path';
+            localPathInput.placeholder = 'e.g. C:\\Users\\USER\\PycharmProjects\\TraceX\\sample_data';
+            fileUploadLabel.textContent = 'Upload Folder (select a directory)';
+            fileUploadInput.setAttribute('webkitdirectory', '');
+            fileUploadInput.setAttribute('directory', '');
+            fileUploadInput.setAttribute('multiple', '');
+            fileUploadInput.accept = '';
+            fileUploadInput.value = '';
+            localPathInput.value = '';
+            inputModeHidden.value = 'folder';
+        }
+        modeFile.addEventListener('change', function() {
+            if (this.checked) setFileMode();
+        });
+        modeFolder.addEventListener('change', function() {
+            if (this.checked) setFolderMode();
+        });
+        // Set initial mode
+        if (modeFile.checked) setFileMode();
+        else setFolderMode();
+
+        // Clear file upload when typing in path field
+        localPathInput.addEventListener('input', function() {
+            fileUploadInput.value = '';
+        });
+        // Clear path field when selecting a file upload
+        fileUploadInput.addEventListener('change', function() {
+            if (fileUploadInput.files.length > 0) {
+                localPathInput.value = '';
+            }
+        });
+    });
+
+    function clearForm() {
+        document.getElementById('extract-form').reset();
+        document.getElementById('results').innerHTML = '';
+        document.getElementById('threads-label').style.display = 'none';
+        document.getElementById('threads').style.display = 'none';
+        hideProgress();
+    }
+
+    function showProgress() {
+        const progressContainer = document.getElementById('progress-container');
+        progressContainer.style.display = 'block';
+        updateProgress(0, 'Initializing...');
+    }
+
+    function hideProgress() {
+        const progressContainer = document.getElementById('progress-container');
+        progressContainer.style.display = 'none';
+    }
+
+    function updateProgress(percentage, status) {
+        const progressFill = document.getElementById('progress-fill');
+        const progressPercentage = document.getElementById('progress-percentage');
+        const progressStatus = document.getElementById('progress-status');
+        
+        progressFill.style.width = percentage + '%';
+        progressPercentage.textContent = percentage + '%';
+        progressStatus.textContent = status;
+    }
+
+    document.getElementById('extract-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData();
+        const fileInput = form.querySelector('#file-upload');
+        const localPath = form.querySelector('#local-path').value;
+        const useMT = form.querySelector('#use-mt').checked;
+        const threads = form.querySelector('#threads').value;
+        const extractIPs = form.querySelector('#extract-ips').checked;
+        const extractHashes = form.querySelector('#extract-hashes').checked;
+        const inputMode = form.querySelector('#input-mode-hidden').value;
+
+        // Handle file/folder upload based on mode
+        if (fileInput && fileInput.files.length > 0) {
+            if (inputMode === 'file') {
+                // Only allow a single file
+                if (fileInput.files.length > 1) {
+                    alert('Please select only one file in File mode.');
+                    return;
+                }
+                formData.append('upload', fileInput.files[0]);
+            } else if (inputMode === 'folder') {
+                // Check if user selected a folder (all files should share a common root directory)
+                const firstPath = fileInput.files[0].webkitRelativePath || fileInput.files[0].name;
+                const hasFolder = fileInput.files[0].webkitRelativePath && fileInput.files[0].webkitRelativePath.includes('/');
+                if (!hasFolder) {
+                    alert('Please select a folder (directory) in Folder mode, not individual files.');
+                    return;
+                }
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    formData.append('upload', fileInput.files[i]);
+                }
+            }
+        }
+        if (localPath) {
+            formData.append('local_path', localPath);
+        }
+        formData.append('use_multithreading', useMT);
+        if (useMT) {
+            formData.append('threads', threads);
+        }
+        formData.append('extract_ips', extractIPs);
+        formData.append('extract_hashes', extractHashes);
+        formData.append('input_mode', inputMode);
+        
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = '';
+        
+        // Show progress bar
+        showProgress();
+        
+        // Simulate progress updates with detailed status
+        let progress = 0;
+        const progressSteps = [
+            { progress: 10, status: 'Initializing extraction...' },
+            { progress: 25, status: 'Discovering files...' },
+            { progress: 40, status: 'Processing archives...' },
+            { progress: 60, status: 'Extracting IP addresses...' },
+            { progress: 80, status: 'Extracting hash values...' },
+            { progress: 90, status: 'Saving to database...' }
+        ];
+        let currentStep = 0;
+        
+        const progressInterval = setInterval(() => {
+            if (currentStep < progressSteps.length) {
+                const step = progressSteps[currentStep];
+                progress = step.progress;
+                updateProgress(progress, step.status);
+                currentStep++;
+            } else if (progress < 90) {
+                progress += Math.random() * 5;
+                updateProgress(Math.min(progress, 90), 'Finalizing results...');
+            }
+        }, 800);
+        
+        try {
+            const response = await fetch('/extract', {
+                method: 'POST',
+                body: formData
+            });
+            
+            // Clear progress interval and show completion
+            clearInterval(progressInterval);
+            updateProgress(100, 'Complete!');
+            
+            // Hide progress after a short delay
+            setTimeout(() => {
+                hideProgress();
+            }, 1000);
+            
+            const data = await response.json();
+            
+            function renderStatistics(ipList, hashList) {
+                let html = '<div class="results-container">';
+                html += '<h3 style="margin: 0 0 16px 0; color: var(--primary-blue);">Extraction Statistics</h3>';
+                
+                // Database success message
+                html += '<div class="status-message status-success" style="margin-bottom: 20px;">✅ Database successfully created and results saved</div>';
+                
+                // Statistics table
+                html += '<table class="results-table">';
+                html += '<tr><th>Metric</th><th>Count</th><th>Details</th></tr>';
+                
+                // Show only IP metrics if only IPs were extracted
+                if (ipList && ipList.length > 0 && (!hashList || hashList.length === 0)) {
+                    const ipv4Count = ipList.filter(ip => ip.version === 4).length;
+                    const ipv6Count = ipList.filter(ip => ip.version === 6).length;
+                    const uniqueIPs = [...new Set(ipList.map(ip => ip.ip))].length;
+                    const uniqueFiles = [...new Set(ipList.map(ip => ip.path))].length;
+                    html += `<tr><td><strong>IP Addresses Found</strong></td><td>${ipList.length}</td><td>Total IP addresses extracted</td></tr>`;
+                    html += `<tr><td>Unique IP Addresses</td><td>${uniqueIPs}</td><td>Distinct IP addresses found</td></tr>`;
+                    html += `<tr><td>IPv4 Addresses</td><td>${ipv4Count}</td><td>IPv4 format addresses</td></tr>`;
+                    html += `<tr><td>IPv6 Addresses</td><td>${ipv6Count}</td><td>IPv6 format addresses</td></tr>`;
+                    html += `<tr><td>Files Processed</td><td>${uniqueFiles}</td><td>Files containing IP addresses</td></tr>`;
+                }
+                // Show only hash metrics if only hashes were extracted
+                else if (hashList && hashList.length > 0 && (!ipList || ipList.length === 0)) {
+                    const hashTypes = {};
+                    hashList.forEach(hash => {
+                        hashTypes[hash.hash_type] = (hashTypes[hash.hash_type] || 0) + 1;
+                    });
+                    const uniqueHashes = [...new Set(hashList.map(hash => hash.hash_value))].length;
+                    const uniqueHashFiles = [...new Set(hashList.map(hash => hash.path))].length;
+                    html += `<tr><td><strong>Hash Values Found</strong></td><td>${hashList.length}</td><td>Total hash values extracted</td></tr>`;
+                    html += `<tr><td>Unique Hash Values</td><td>${uniqueHashes}</td><td>Distinct hash values found</td></tr>`;
+                    html += `<tr><td>Files with Hashes</td><td>${uniqueHashFiles}</td><td>Files containing hash values</td></tr>`;
+                    Object.entries(hashTypes).forEach(([type, count]) => {
+                        html += `<tr><td>${type} Hashes</td><td>${count}</td><td>${type} format hashes</td></tr>`;
+                    });
+                }
+                // Show both metrics if both were extracted
+                else if (ipList && ipList.length > 0 && hashList && hashList.length > 0) {
+                    // IP metrics
+                    const ipv4Count = ipList.filter(ip => ip.version === 4).length;
+                    const ipv6Count = ipList.filter(ip => ip.version === 6).length;
+                    const uniqueIPs = [...new Set(ipList.map(ip => ip.ip))].length;
+                    const uniqueFiles = [...new Set(ipList.map(ip => ip.path))].length;
+                    html += `<tr><td><strong>IP Addresses Found</strong></td><td>${ipList.length}</td><td>Total IP addresses extracted</td></tr>`;
+                    html += `<tr><td>Unique IP Addresses</td><td>${uniqueIPs}</td><td>Distinct IP addresses found</td></tr>`;
+                    html += `<tr><td>IPv4 Addresses</td><td>${ipv4Count}</td><td>IPv4 format addresses</td></tr>`;
+                    html += `<tr><td>IPv6 Addresses</td><td>${ipv6Count}</td><td>IPv6 format addresses</td></tr>`;
+                    html += `<tr><td>Files Processed</td><td>${uniqueFiles}</td><td>Files containing IP addresses</td></tr>`;
+
+                    // Hash metrics
+                    const hashTypes = {};
+                    hashList.forEach(hash => {
+                        hashTypes[hash.hash_type] = (hashTypes[hash.hash_type] || 0) + 1;
+                    });
+                    const uniqueHashes = [...new Set(hashList.map(hash => hash.hash_value))].length;
+                    const uniqueHashFiles = [...new Set(hashList.map(hash => hash.path))].length;
+                    html += `<tr><td><strong>Hash Values Found</strong></td><td>${hashList.length}</td><td>Total hash values extracted</td></tr>`;
+                    html += `<tr><td>Unique Hash Values</td><td>${uniqueHashes}</td><td>Distinct hash values found</td></tr>`;
+                    html += `<tr><td>Files with Hashes</td><td>${uniqueHashFiles}</td><td>Files containing hash values</td></tr>`;
+                    Object.entries(hashTypes).forEach(([type, count]) => {
+                        html += `<tr><td>${type} Hashes</td><td>${count}</td><td>${type} format hashes</td></tr>`;
+                    });
+                }
+                html += '</table>';
+                // Summary message
+                const totalItems = (ipList ? ipList.length : 0) + (hashList ? hashList.length : 0);
+                if (totalItems > 0) {
+                    html += `<div class="status-message status-info" style="margin-top: 16px;">📊 Summary: Successfully extracted ${totalItems} total items from your files</div>`;
+                } else {
+                    html += `<div class="status-message status-info" style="margin-top: 16px;">📊 Summary: No items found in the provided files</div>`;
+                }
+                html += '</div>';
+                return html;
+            }
+
+            if (Array.isArray(data) && data.length > 0) {
+                if (data[0].ip !== undefined) {
+                    resultsDiv.innerHTML = renderStatistics(data, []);
+                } else if (data[0].hash_value !== undefined) {
+                    resultsDiv.innerHTML = renderStatistics([], data);
+                } else {
+                    resultsDiv.innerHTML = '<div class="status-message status-info">No results found in the provided files.</div>';
+                }
+            } else if (data.ips || data.hashes) {
+                resultsDiv.innerHTML = renderStatistics(data.ips || [], data.hashes || []);
+            } else if (data.error) {
+                resultsDiv.innerHTML = `<div class="status-message status-error">Error: ${data.error}</div>`;
+            } else {
+                resultsDiv.innerHTML = '<div class="status-message status-info">No results found in the provided files.</div>';
+            }
+        } catch (err) {
+            // Clear progress interval and hide progress bar
+            clearInterval(progressInterval);
+            hideProgress();
+            resultsDiv.innerHTML = `<div class="status-message status-error">Network Error: ${err.message}</div>`;
+        }
+    });
+</script>
+</body>
+</html>
